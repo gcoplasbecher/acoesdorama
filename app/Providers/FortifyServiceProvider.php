@@ -6,6 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -40,6 +41,23 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $login = $request->input(Fortify::username());
+            $password = $request->input('password');
+
+            // Tenta autenticar por email
+            if (Auth::attempt(['email' => $login, 'password' => $password])) {
+                return Auth::user();
+            }
+
+            // Se não encontrar por email, tenta por CPF
+            if (Auth::attempt(['cpf' => $login, 'password' => $password])) {
+                return Auth::user();
+            }
+
+            return null;
+        });
     }
 
     /**

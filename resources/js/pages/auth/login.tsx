@@ -10,6 +10,7 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 
 interface LoginProps {
     status?: string;
@@ -22,12 +23,33 @@ export default function Login({
     canResetPassword,
     canRegister,
 }: LoginProps) {
+    const [loginMode, setLoginMode] = useState<'email' | 'cpf' | 'default'>('default');
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const emailRegex = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+(\.[a-z]+)?$/i;
+        const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+        const digitsOnly = value.replace(/\D/g, '');
+
+        if (cpfRegex.test(value) || digitsOnly.length === 11) {
+            setLoginMode('cpf');
+        } else if (emailRegex.test(value)) {
+            setLoginMode('email');
+        } else if (value === '') {
+            setLoginMode('default');
+        }
+        // else keep previous or default
+    };
+
+    const labelText = loginMode === 'cpf' ? 'CPF' : loginMode === 'email' ? 'Email' : 'CPF ou Email';
+    const placeholderText = loginMode === 'cpf' ? 'Digite seu CPF (XXX.XXX.XXX-XX)' : loginMode === 'email' ? 'email@example.com' : 'Digite seu email ou cpf';
+
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title="Logue na sua conta"
+            description="Faça login na sua conta para continuar"
         >
-            <Head title="Log in" />
+            <Head title="Login" />
 
             <Form
                 {...store.form()}
@@ -38,30 +60,31 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">{labelText}</Label>
                                 <Input
                                     id="email"
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     required
                                     autoFocus
                                     tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="email@example.com"
+                                    autoComplete={loginMode === 'cpf' ? 'cpf' : loginMode === 'email' ? 'email' : 'username'}
+                                    placeholder={placeholderText}
+                                    onChange={handleInputChange}
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">Senha</Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
+                                            Esqueceu o password?
                                         </TextLink>
                                     )}
                                 </div>
@@ -83,7 +106,7 @@ export default function Login({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">Lembrar de mim</Label>
                             </div>
 
                             <Button
@@ -94,15 +117,15 @@ export default function Login({
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                Login
                             </Button>
                         </div>
 
                         {canRegister && (
                             <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
+                                Não tem uma conta?{' '}
                                 <TextLink href={register()} tabIndex={5}>
-                                    Sign up
+                                    Registre-se
                                 </TextLink>
                             </div>
                         )}
