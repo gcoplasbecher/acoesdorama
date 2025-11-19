@@ -27,7 +27,7 @@ export default function Home() {
             <div className="flex min-h-screen min-w-screen flex-col items-center bg-gradient-to-b from-green-900 to-green-700">
                 <header className="top-0 right-0 left-0 mx-auto flex w-full items-center justify-between p-6 text-sm text-white">
                     <div className="mb-1 flex h-12 w-24 items-center justify-center rounded-md">
-                        <AppLogoIcon className="size-24 fill-current text-[var(--foreground)] dark:text-white" />
+                        <AppLogoIcon className="size-24 fill-current text-white" />
                     </div>
                     <nav className="flex items-center justify-end gap-4">
                         <Link href={login()} className="hover:underline">
